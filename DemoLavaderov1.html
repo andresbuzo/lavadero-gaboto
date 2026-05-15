@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lavadero Nuevo Gaboto</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Nunito',sans-serif;background:#dff0fb;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.chat-container{width:340px;border-radius:20px;overflow:hidden;box-shadow:0 16px 48px rgba(0,57,140,0.22);}
+.chat-header{background:linear-gradient(135deg,#003a8c 0%,#0080e8 100%);padding:14px 16px;display:flex;align-items:center;gap:11px;}
+.header-logo{width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,0.8);flex-shrink:0;background:#fff;}
+.header-logo img{width:100%;height:100%;object-fit:cover;}
+.hname{font-size:14px;font-weight:800;color:#fff;}
+.hloc{font-size:10.5px;color:rgba(255,255,255,0.7);margin-top:1px;}
+.hstatus{font-size:11px;color:#7de8c0;display:flex;align-items:center;gap:4px;margin-top:3px;}
+.hdot{width:6px;height:6px;border-radius:50%;background:#3ddc84;display:inline-block;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.messages{background:#e4f2fc;padding:14px 12px;min-height:220px;max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;}
+.messages::-webkit-scrollbar{width:4px;}
+.messages::-webkit-scrollbar-thumb{background:#b8d8f5;border-radius:4px;}
+.msg{max-width:88%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.55;animation:msgIn 0.25s ease both;}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.msg.bot{background:#fff;color:#0a1e4a;border-radius:4px 16px 16px 16px;align-self:flex-start;border:0.5px solid #b8d8f5;}
+.msg.user{background:#0057c2;color:#fff;border-radius:16px 4px 16px 16px;align-self:flex-end;}
+.msg strong{color:#0057c2;}
+.msg.user strong{color:#b8e4ff;}
+.msg ul{margin:5px 0 0;padding-left:14px;}
+.msg ul li{margin-bottom:3px;}
+.typing{display:flex;align-items:center;gap:4px;background:#fff;border-radius:4px 16px 16px 16px;padding:10px 14px;align-self:flex-start;border:0.5px solid #b8d8f5;}
+.typing span{width:7px;height:7px;border-radius:50%;background:#0057c2;animation:bounce 1s infinite;display:inline-block;}
+.typing span:nth-child(2){animation-delay:0.15s;}
+.typing span:nth-child(3){animation-delay:0.3s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:0.4;}30%{transform:translateY(-5px);opacity:1;}}
+.divider-line{height:0.5px;background:#b8d8f5;}
+.options-area{background:#e4f2fc;padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px;}
+.opt-btn{background:#fff;border:2px solid #0057c2;color:#003a8c;border-radius:10px;padding:9px 13px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;transition:all 0.18s ease;}
+.opt-btn:hover{background:#0057c2;color:#fff;transform:translateX(3px);}
+.opt-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.opt-btn .icon{font-size:17px;color:#d0230f;flex-shrink:0;transition:color 0.18s;}
+.opt-btn:hover .icon{color:#fff;}
+.chat-footer{background:#fff;padding:9px 12px;display:flex;align-items:center;gap:7px;border-top:0.5px solid #b8d8f5;}
+.footer-text{font-size:11px;color:#aaa;flex:1;font-style:italic;}
+.back-btn{display:none;align-items:center;gap:4px;background:none;border:1.5px solid #0057c2;color:#0057c2;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:4px 9px;border-radius:14px;transition:all 0.15s;}
+.back-btn:hover{background:#0057c2;color:#fff;}
+.error-msg{color:#c0392b;font-size:12px;font-style:italic;}
+</style>
+</head>
+<body>
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="header-logo">
+      <img src="logo.png" alt="Logo" onerror="this.style.display='none'"/>
+    </div>
+    <div>
+      <div class="hname">Lavadero Nuevo Gaboto</div>
+      <div class="hloc">Gaboto, Montevideo</div>
+      <div class="hstatus"><span class="hdot"></span> En línea ahora</div>
+    </div>
+  </div>
+  <div class="messages" id="messages">
+    <div class="msg bot">¡Hola! 👋 Bienvenido/a al <strong>Lavadero Nuevo Gaboto</strong>.<br>¿En qué te puedo ayudar hoy?</div>
+  </div>
+  <div class="divider-line"></div>
+  <div class="options-area" id="options">
+    <button class="opt-btn" onclick="choose('servicios')"><span class="icon">🧺</span> Servicios y precios</button>
+    <button class="opt-btn" onclick="choose('express')"><span class="icon">⚡</span> Servicio Express</button>
+    <button class="opt-btn" onclick="choose('envios')"><span class="icon">🚚</span> Envíos a domicilio</button>
+    <button class="opt-btn" onclick="choose('horarios')"><span class="icon">🕐</span> Horarios</button>
+    <button class="opt-btn" onclick="choose('contacto')"><span class="icon">📞</span> Contacto</button>
+  </div>
+  <div class="chat-footer">
+    <span style="font-size:13px">🔒</span>
+    <span class="footer-text">Powered by IA · Lavadero Nuevo Gaboto</span>
+    <button class="back-btn" id="backBtn" onclick="goBack()">← Menú</button>
+  </div>
+</div>
+
+<script>
+// ─── CONFIGURACIÓN ──────────────────────────────────────────
+const GEMINI_API_KEY = "AIzaSyD5Cqbqmq7P6z55Kl_v400XLgqgvKWoIUk";
+
+const CONTEXTO_NEGOCIO = `
+Eres el asistente virtual del Lavadero Nuevo Gaboto, ubicado en Gaboto, Montevideo, Uruguay.
+Respondé siempre en español rioplatense (vos, che), de forma amigable, breve y directa.
+Usá emojis con moderación. No inventes información que no esté aquí abajo.
+
+INFORMACIÓN DEL NEGOCIO:
+- Nombre: Lavadero Nuevo Gaboto
+- Dirección: Gaboto, Montevideo, Uruguay
+- Teléfono: 2402 7411
+
+HORARIOS:
+- Lunes a viernes: 9:00 a 20:00 hs
+- Sábados: 9:00 a 13:00 hs
+- Domingos: Cerrado
+
+SERVICIOS Y PRECIOS (entrega en 24 a 48 hs):
+- Medio lavado (~7 prendas): $230
+- Lavado completo (~14 prendas): $320
+- Acolchado 1 plaza: $500
+- Acolchado o frazada 2 plazas: $600
+
+SERVICIO EXPRESS (entrega en 5 a 8 hs):
+- Lavado completo express: $420
+
+ENVÍOS A DOMICILIO:
+- Retiro y entrega a domicilio disponible
+- Costo adicional: $150
+- Para coordinar: llamar al 2402 7411
+
+Respondé de forma conversacional y natural, como si fueras un empleado del lavadero.
+Máximo 3 oraciones. No uses listas con guiones, usá lenguaje natural.
+`;
+
+const PREGUNTAS = {
+  servicios: "El cliente pregunta por los servicios y precios disponibles del lavadero.",
+  express:   "El cliente pregunta por el servicio express y qué implica.",
+  envios:    "El cliente pregunta por los envíos y retiros a domicilio.",
+  horarios:  "El cliente pregunta por los horarios de atención del lavadero.",
+  contacto:  "El cliente pregunta cómo contactarse con el lavadero."
+};
+
+const ETIQUETAS = {
+  servicios: { label: "Servicios y precios", icon: "🧺" },
+  express:   { label: "Servicio Express",    icon: "⚡" },
+  envios:    { label: "Envíos a domicilio",  icon: "🚚" },
+  horarios:  { label: "Horarios",            icon: "🕐" },
+  contacto:  { label: "Contacto",            icon: "📞" }
+};
+// ────────────────────────────────────────────────────────────
+
+async function llamarGemini(pregunta) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const body = {
+    contents: [{
+      parts: [{
+        text: CONTEXTO_NEGOCIO + "\n\nSITUACIÓN ACTUAL: " + pregunta
+      }]
+    }],
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 200
+    }
+  };
+
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+
+  if (!resp.ok) throw new Error("Error " + resp.status);
+  const data = await resp.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
+function setButtonsDisabled(disabled) {
+  document.querySelectorAll(".opt-btn").forEach(b => b.disabled = disabled);
+}
+
+async function choose(key) {
+  const msgs    = document.getElementById("messages");
+  const opts    = document.getElementById("options");
+  const backBtn = document.getElementById("backBtn");
+  const et      = ETIQUETAS[key];
+
+  // Mensaje del usuario
+  const um = document.createElement("div");
+  um.className = "msg user";
+  um.textContent = et.icon + " " + et.label;
+  msgs.appendChild(um);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Deshabilitar botones y limpiar opciones
+  setButtonsDisabled(true);
+  opts.innerHTML = "";
+  backBtn.style.display = "flex";
+
+  // Typing indicator
+  const typing = document.createElement("div");
+  typing.className = "typing";
+  typing.innerHTML = "<span></span><span></span><span></span>";
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    const respuesta = await llamarGemini(PREGUNTAS[key]);
+    msgs.removeChild(typing);
+
+    const bm = document.createElement("div");
+    bm.className = "msg bot";
+    bm.textContent = respuesta;
+    msgs.appendChild(bm);
+    msgs.scrollTop = msgs.scrollHeight;
+
+  } catch (err) {
+    msgs.removeChild(typing);
+    const em = document.createElement("div");
+    em.className = "msg bot";
+    em.innerHTML = '<span class="error-msg">⚠️ No pude conectarme ahora. Llamanos al <strong>2402 7411</strong>.</span>';
+    msgs.appendChild(em);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+}
+
+function goBack() {
+  const msgs    = document.getElementById("messages");
+  const opts    = document.getElementById("options");
+  const backBtn = document.getElementById("backBtn");
+
+  const bm = document.createElement("div");
+  bm.className = "msg bot";
+  bm.textContent = "¿En qué más te puedo ayudar?";
+  msgs.appendChild(bm);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  opts.innerHTML = `
+    <button class="opt-btn" onclick="choose('servicios')"><span class="icon">🧺</span> Servicios y precios</button>
+    <button class="opt-btn" onclick="choose('express')"><span class="icon">⚡</span> Servicio Express</button>
+    <button class="opt-btn" onclick="choose('envios')"><span class="icon">🚚</span> Envíos a domicilio</button>
+    <button class="opt-btn" onclick="choose('horarios')"><span class="icon">🕐</span> Horarios</button>
+    <button class="opt-btn" onclick="choose('contacto')"><span class="icon">📞</span> Contacto</button>
+  `;
+  backBtn.style.display = "none";
+}
+</script>
+</body>
+</html>
